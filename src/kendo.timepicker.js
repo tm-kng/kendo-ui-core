@@ -903,11 +903,30 @@ var __meta__ = { // jshint ignore:line
                                 '<ul class="k-reset">';
 
             for( var i = 0;i < length; i++){
-                result += '<li class="k-item" data-value="' + values[i] + '">' +
-                                '<span>' + values[i] + '</span>' +
-                           '</li>';
+                if(part.type === 'minute' || title === 'minute'){
+                    if(!!this.options.interval){
+                        if(values[i]%this.options.interval === 0){
+                            result += '<li class="k-item" data-value="' + values[i] + '">' +
+                            '<span>' + values[i] + '</span>' +
+                            '</li>';
+                        }
+                        else{
+                            result += ''
+                        }
+                    }
+                    else{
+                        result += '<li class="k-item" data-value="' + values[i] + '">' +
+                        '<span>' + values[i] + '</span>' +
+                        '</li>';
+                    }
+                }
+                else{
+                    result += '<li class="k-item" data-value="' + values[i] + '">' +
+                    '<span>' + values[i] + '</span>' +
+                    '</li>';
+                }
+                
             }
-
             result += '</ul>' +
                       '<div class="k-scrollable-placeholder"></div>' +
                     '</div>' +
