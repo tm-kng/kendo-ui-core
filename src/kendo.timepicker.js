@@ -884,6 +884,7 @@ var __meta__ = { // jshint ignore:line
                     result += this._literalTemplate(part);
                 } else {
                     values = this._getValues(part, true);
+
                     result += this._itemTemplate(values.values, part, this.options.messages[part.type], values.index);
                 }
             }
@@ -904,6 +905,7 @@ var __meta__ = { // jshint ignore:line
 
             for( var i = 0;i < length; i++){
                 if(part.type === 'minute' || title === 'minute'){
+                    
                     if(!!this.options.interval){
                         if(values[i]%this.options.interval === 0){
                             result += '<li class="k-item" data-value="' + values[i] + '">' +
@@ -911,7 +913,7 @@ var __meta__ = { // jshint ignore:line
                             '</li>';
                         }
                         else{
-                            result += ''
+
                         }
                     }
                     else{
@@ -937,6 +939,55 @@ var __meta__ = { // jshint ignore:line
         },
 
         _getValues: function (part, shouldPad) {
+            if(!!this.options && !!this.options.extendedRange && this.options.extendedRange && !!this.options.min && !!this.options.max && this.options.min < this.options.max ){
+
+                var result = [];
+                var index;
+                var start = 0;
+                var end;
+                var dateStart = new Date(this.options.min);
+                var dateEnd = new Date(this.options.max);
+                var curr = new Date(this.options.min);
+                if (part.type === "hour") {
+                    start = part.hour12 ? 1 : 0;
+                    index = 1;
+                    end = part.hour12 ? 12 : 23;
+                } else if (part.type === "minute") {
+                    index = 2;
+                    end = 59;
+                } else if (part.type === "second") {
+                    index = 3;
+                    end = 59;
+                }
+                if(part.type ==="hour")
+                {
+                    console.log('start at' , curr);
+                    console.log('End at' ,dateEnd);
+                    for (; curr.valueOf() <= dateEnd.valueOf();) {
+                        console.log("Date Start " + curr.valueOf());
+                        console.log("Date End " + dateEnd.valueOf());
+                        console.log("pushing " + curr);
+                        console.log("pushing " + curr.getHours());
+                        result.push(shouldPad ? pad(curr.getHours()) : curr.getHours());
+                        curr.setHours(curr.getHours()+1);
+                        console.log("pushing " + curr);
+                    }
+                }
+                else{
+                    for (; start <= end; start++) {
+                        result.push(shouldPad ? pad(start) : start);
+                    }
+        
+                }
+
+                return {
+                    values: result,
+                    index: index
+                };
+                    
+
+            }
+
             var result = [];
             var index;
             var start = 0;
@@ -953,8 +1004,9 @@ var __meta__ = { // jshint ignore:line
                 index = 3;
                 end = 59;
             }
-
+            
             for (; start <= end; start++) {
+                
                 result.push(shouldPad ? pad(start) : start);
             }
 
@@ -1430,7 +1482,8 @@ var __meta__ = { // jshint ignore:line
                 millisecond: "millisecond",
                 now: "Now"
             },
-            componentType: "classic"
+            componentType: "classic",
+            extendedRange : false
         },
 
         events: [
