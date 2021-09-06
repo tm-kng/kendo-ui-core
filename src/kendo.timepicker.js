@@ -773,6 +773,7 @@ var __meta__ = { // jshint ignore:line
             var minutesList = this.ul.find('[' + indexAttr + '="2"]');
             var secondsList = this.ul.find('[' + indexAttr + '="3"]');
             var designatorList = this.ul.find('[' + indexAttr + '="4"]');
+            var selectedDays;
             var selectedHour;
             var selectedMinutes;
             var selectedSeconds;
@@ -788,7 +789,11 @@ var __meta__ = { // jshint ignore:line
 
             if (hoursList.length) {
                 selectedHour = +this._findSelectedValue(hoursList);
+                if(this.options.extendedRange){
+                    selectedDays = +this._findSelectedValueDate(hoursList)
+                }
             }
+            
 
             if (minutesList.length) {
                 selectedMinutes = +this._findSelectedValue(minutesList);
@@ -815,6 +820,10 @@ var __meta__ = { // jshint ignore:line
                 }
             }
 
+            if(selectedDays !== undefined){
+                this._currentlySelected.setDate(selectedDays);
+            }
+
             if (selectedHour !== undefined) {
                 this._currentlySelected.setHours(selectedHour);
             }
@@ -822,7 +831,7 @@ var __meta__ = { // jshint ignore:line
             if (selectedMinutes !== undefined) {
                 this._currentlySelected.setMinutes(selectedMinutes);
             }
-
+            
             if (selectedSeconds !== undefined) {
                 this._currentlySelected.setSeconds(selectedSeconds);
             }
@@ -832,6 +841,10 @@ var __meta__ = { // jshint ignore:line
            var firstOccurence = firstItemIndex(list.scrollTop(), getItemHeight(list.find(".k-item:visible:eq(0)")));
            return list.find(".k-item:visible").eq(firstOccurence).attr("data-value");
         },
+        _findSelectedValueDate: function(list) {
+            var firstOccurence = firstItemIndex(list.scrollTop(), getItemHeight(list.find(".k-item:visible:eq(0)")));
+            return list.find(".k-item:visible").eq(firstOccurence).attr("data-date");
+         },
 
         _itemClickHandler: function (e) {
             var list = $(e.originalEvent.currentTarget);
@@ -923,9 +936,26 @@ var __meta__ = { // jshint ignore:line
                     }
                 }
                 else{
-                    result += '<li class="k-item" data-value="' + values[i] + '">' +
-                    '<span>' + values[i] + '</span>' +
-                    '</li>';
+
+                    if(part.type==='hour' || title === 'hour' && !!this.options && this.options.extendedRange){
+                        if(Array.isArray(values[i])){
+                            result += '<li class="k-item" data-value="' + values[i][0] + '" data-date="' + values[i][1] + '" >' +
+                            '<span>' + values[i][0] + '</span>' +
+                            '</li>'
+                        }
+                        else{
+                            result += '<li class="k-item" data-value="' + values[i] + '">' +
+                            '<span>' + values[i] + '</span>' +
+                            '</li>';
+                        }
+                        
+                    }
+                    else{
+                        result += '<li class="k-item" data-value="' + values[i] + '">' +
+                        '<span>' + values[i] + '</span>' +
+                        '</li>';
+                    }
+                    
                 }
                 
             }
@@ -964,13 +994,17 @@ var __meta__ = { // jshint ignore:line
                     console.log('start at' , curr);
                     console.log('End at' ,dateEnd);
                     for (; curr.valueOf() <= dateEnd.valueOf();) {
-                        console.log("Date Start " + curr.valueOf());
-                        console.log("Date End " + dateEnd.valueOf());
-                        console.log("pushing " + curr);
-                        console.log("pushing " + curr.getHours());
-                        result.push(shouldPad ? pad(curr.getHours()) : curr.getHours());
+                        var days  = curr.getDate();
+                        if(curr.getMonth()>dateStart.getMonth())
+                        {
+                            var offset = new Date(dateStart.getFullYear(),dateStart.getMonth(),1);
+                            offset.setDate(0);
+                            days += offset.getDate();
+                            console.log(days);
+                        }
+
+                        result.push([shouldPad ? pad(curr.getHours()) : curr.getHours(),days]);
                         curr.setHours(curr.getHours()+1);
-                        console.log("pushing " + curr);
                     }
                 }
                 else{
@@ -982,7 +1016,8 @@ var __meta__ = { // jshint ignore:line
 
                 return {
                     values: result,
-                    index: index
+                    index: index,
+                    
                 };
                     
 
